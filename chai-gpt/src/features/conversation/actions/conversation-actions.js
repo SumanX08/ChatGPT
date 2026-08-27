@@ -28,33 +28,30 @@ export async function getConversation(conversationId) {
 export async function listConversations() {
   const user = await requireUser();
 
-  return prisma.conversation.findMany({
+  const conversations = await prisma.conversation.findMany({
     where: {
       userId: user.id,
       isArchived: false,
-
-      // Main conversations only.
-      parentId: null,
     },
 
     orderBy: [
       { isPinned: "desc" },
       { lastMessageAt: "desc" },
     ],
-
-    select: {
-      id: true,
-      title: true,
-      isPinned: true,
-      isArchived: true,
-      lastMessageAt: true,
-      createdAt: true,
-      updatedAt: true,
-
-      parentId: true,
-      branchFromMessageId: true,
-    },
   });
+
+  console.log(
+    "LIST CONVERSATIONS RESULT:",
+    conversations.map((conversation) => ({
+      id: conversation.id,
+      title: conversation.title,
+      userId: conversation.userId,
+      isArchived: conversation.isArchived,
+      parentId: conversation.parentId,
+    }))
+  );
+
+  return conversations;
 }
 
 export async function createConversation(title = "New Chat") {
@@ -223,14 +220,15 @@ export async function createBranch(
       },
     });
 
+    const originalTitle = parentConversation.title
+  .replace(/^(Branch of )+/, "");
+
   const branch =
     await prisma.conversation.create({
       data: {
         userId: user.id,
 
-        title: `Branch of ${
-          parentConversation.title
-        }`,
+       title: `Branch of ${originalTitle}`,
 
         model: parentConversation.model,
 
@@ -266,6 +264,15 @@ export async function createBranch(
   revalidatePath(`/c/${conversationId}`);
   revalidatePath(`/c/${branch.id}`);
   revalidatePath("/");
+
+  console.log("CREATED BRANCH:", {
+  id: branch.id,
+  userId: branch.userId,
+  title: branch.title,
+  isArchived: branch.isArchived,
+  parentId: branch.parentId,
+  branchFromMessageId: branch.branchFromMessageId,
+});
 
   return branch;
 }

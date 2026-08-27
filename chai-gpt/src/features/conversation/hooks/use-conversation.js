@@ -6,11 +6,11 @@ import { toast } from "sonner";
 
 import {
   createConversation,
+  createBranch,
   deleteConversation,
   listConversations,
   updateConversation,
 } from "@/features/conversation/actions/conversation-actions";
-
 import { queryKeys } from "../utils/query-keys";
 
 
@@ -95,6 +95,53 @@ export function useDeleteConversation(activeId) {
 
     onError: (error) => {
       toast.error(error.message || "Could not delete chat");
+    },
+  });
+}
+
+export function useCreateBranch() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: ({ conversationId, messageId }) =>
+      createBranch(conversationId, messageId),
+
+    onSuccess: (branch) => {
+      console.log("BRANCH RETURNED:", branch);
+
+      // Add branch directly to the conversations cache
+      queryClient.setQueryData(
+        queryKeys.conversations.all,
+        (oldConversations = []) => {
+          const alreadyExists = oldConversations.some(
+            (conversation) => conversation.id === branch.id
+          );
+
+          if (alreadyExists) {
+            return oldConversations;
+          }
+
+          return [branch, ...oldConversations];
+        }
+      );
+
+      router.push(`/c/${branch.id}`);
+
+      toast.success("Branch created");
+
+      // Sync with server afterwards
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.conversations.all,
+      });
+    },
+
+    onError: (error) => {
+      console.error("Branch error:", error);
+
+      toast.error(
+        error.message || "Could not create branch"
+      );
     },
   });
 }

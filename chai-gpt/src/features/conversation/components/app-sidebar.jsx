@@ -47,6 +47,8 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { data: conversations, isLoading } = useConversations();
 
+  console.log("SIDEBAR CONVERSATIONS:", conversations);
+
   const activeId = pathname.startsWith("/c/")
     ? pathname.split("/")[2]
     : undefined;

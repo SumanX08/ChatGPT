@@ -19,27 +19,22 @@ model User {
 }
 
 model Conversation {
-  id           String  @id @default(cuid())
-  userId       String
-  title        String  @default("New Chat")
-  model        String?
-  systemPrompt String?
-  isPinned     Boolean @default(false)
-  isArchived   Boolean @default(false)
-
-  // Branching
-  parentId            String?
+  id                  String         @id @default(cuid())
+  userId              String
+  title               String         @default("New Chat")
+  model               String?
+  systemPrompt        String?
+  isPinned            Boolean        @default(false)
+  isArchived          Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  lastMessageAt       DateTime       @default(now())
   branchFromMessageId String?
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  lastMessageAt DateTime @default(now())
-
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages Message[]
-
-  parent   Conversation?  @relation("ConversationBranches", fields: [parentId], references: [id], onDelete: Cascade)
-  branches Conversation[] @relation("ConversationBranches")
+  parentId            String?
+  parent              Conversation?  @relation("ConversationBranches", fields: [parentId], references: [id], onDelete: Cascade)
+  branches            Conversation[] @relation("ConversationBranches")
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages            Message[]
 
   @@index([userId, lastMessageAt(sort: Desc)])
   @@index([userId, isPinned, lastMessageAt(sort: Desc)])

@@ -50,10 +50,13 @@ export function ChatComposer({
   const canSend = value.trim().length > 0 && !isSending;
 
   return (
-    <form
-      onSubmit={(event) => void handleSubmit(event)}
-      className={cn("mx-auto w-full max-w-3xl px-4 pb-4 md:px-6", className)}
-    >
+   <form
+  onSubmit={(event) => void handleSubmit(event)}
+  className={cn(
+    "mx-auto w-full max-w-3xl shrink-0 px-4 pb-4 md:px-6",
+    className
+  )}
+>
       <InputGroup className="h-auto min-h-14 rounded-3xl border-border/80 bg-background shadow-sm dark:bg-input/40">
         <InputGroupTextarea
           ref={textareaRef}
@@ -83,9 +86,7 @@ export function ChatComposer({
         </InputGroupAddon>
       </InputGroup>
 
-      <p className="mt-2 text-center text-xs text-muted-foreground">
-        ChaiGPT can make mistakes. Check important info.
-      </p>
+    
     </form>
   );
 }

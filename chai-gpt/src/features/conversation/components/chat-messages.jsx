@@ -1,8 +1,6 @@
 "use client";
 
 import { isTextUIPart } from "ai";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 
 import {
   Conversation,
@@ -13,11 +11,18 @@ import {
   Message,
   MessageContent,
   MessageResponse,
+  MessageActions,
+  MessageAction,
 } from "@/components/ai-elements/message";
+
+import {
+  GitBranchIcon,
+  Loader2Icon,
+} from "lucide-react";
 
 import { Loader } from "@/components/ai-elements/loader";
 
-import { createBranch } from "@/features/conversation/actions/conversation-actions";
+import { useCreateBranch } from "@/features/conversation/hooks/use-conversation";
 
 function getMessageText(message) {
   return message.parts
@@ -27,33 +32,30 @@ function getMessageText(message) {
 }
 
 function BranchButton({ conversationId, messageId }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const createBranch = useCreateBranch();
 
   function handleBranch() {
-    startTransition(async () => {
-      try {
-        const branch = await createBranch(
-          conversationId,
-          messageId
-        );
-
-        router.push(`/c/${branch.id}`);
-      } catch (error) {
-        console.error("Failed to create branch:", error);
-      }
+    createBranch.mutate({
+      conversationId,
+      messageId,
     });
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleBranch}
-      disabled={isPending}
-      className="mt-2 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
-    >
-      {isPending ? "Creating branch..." : "Branch"}
-    </button>
+    <MessageActions className=" transition-opacity ">
+      <MessageAction
+        tooltip="Branch from this message"
+        label="Branch from this message"
+        onClick={handleBranch}
+        disabled={createBranch.isPending}
+      >
+        {createBranch.isPending ? (
+          <Loader2Icon className="size-4 animate-spin" />
+        ) : (
+          <GitBranchIcon className="size-4 hover:cursor-pointer" />
+        )}
+      </MessageAction>
+    </MessageActions>
   );
 }
 
@@ -73,8 +75,9 @@ export function ChatMessages({
   );
 
   return (
+  <div className="flex min-h-0 flex-1">
     <Conversation>
-      <ConversationContent className="py-8">
+      <ConversationContent className="mx-auto w-full max-w-3xl py-8">
         {messages.map((message) => {
           const text = getMessageText(message);
 
@@ -115,7 +118,6 @@ export function ChatMessages({
           <Message from="assistant">
             <MessageContent>
               <Loader />
-
               <span className="text-sm text-muted-foreground">
                 Searching the web...
               </span>
@@ -124,5 +126,6 @@ export function ChatMessages({
         )}
       </ConversationContent>
     </Conversation>
-  );
+  </div>
+);
 }

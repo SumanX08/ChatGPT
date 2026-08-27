@@ -11,7 +11,10 @@ import {
 
 export const Conversation = ({ className, ...props }) => (
   <StickToBottom
-    className={cn("relative flex-1 overflow-y-hidden", className)}
+    className={cn(
+      "relative flex flex-1 min-h-0 overflow-y-auto",
+      className
+    )}
     initial="smooth"
     resize="smooth"
     role="log"
@@ -24,7 +27,10 @@ export const ConversationContent = ({
   ...props
 }) => (
   <StickToBottom.Content
-    className={cn("flex flex-col gap-8 p-4", className)}
+    className={cn(
+      "flex flex-col gap-6 p-4",
+      className
+    )}
     {...props}
   />
 );

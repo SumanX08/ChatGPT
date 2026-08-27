@@ -38,10 +38,12 @@ export const Message = ({
 }) => (
   <div
     className={cn(
-      "group flex w-full max-w-[95%] flex-col gap-2",
+      "group flex w-full flex-col gap-2",
+
       from === "user"
-        ? "is-user ml-auto justify-end"
-        : "is-assistant",
+        ? "is-user items-end"
+        : "is-assistant items-start",
+
       className
     )}
     {...props}
@@ -55,9 +57,19 @@ export const MessageContent = ({
 }) => (
   <div
     className={cn(
-      "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm",
-      "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
+      "min-w-0 text-sm",
+
+      "group-[.is-user]:max-w-[75%]",
+      "group-[.is-user]:rounded-2xl",
+      "group-[.is-user]:bg-secondary",
+      "group-[.is-user]:px-4",
+      "group-[.is-user]:py-3",
+      "group-[.is-user]:text-foreground",
+
+      "group-[.is-assistant]:w-full",
+      "group-[.is-assistant]:max-w-full",
       "group-[.is-assistant]:text-foreground",
+
       className
     )}
     {...props}
@@ -87,25 +99,27 @@ export const MessageAction = ({
   size = "icon-sm",
   ...props
 }) => {
-  const button = (
-    <Button
-      size={size}
-      type="button"
-      variant={variant}
-      {...props}
-    >
-      {children}
-      <span className="sr-only">
-        {label || tooltip}
-      </span>
-    </Button>
-  );
-
   if (tooltip) {
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger>{button}</TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                size={size}
+                type="button"
+                variant={variant}
+                {...props}
+              />
+            }
+          >
+            {children}
+
+            <span className="sr-only">
+              {label || tooltip}
+            </span>
+          </TooltipTrigger>
+
           <TooltipContent>
             <p>{tooltip}</p>
           </TooltipContent>
@@ -114,8 +128,22 @@ export const MessageAction = ({
     );
   }
 
-  return button;
+  return (
+    <Button
+      size={size}
+      type="button"
+      variant={variant}
+      {...props}
+    >
+      {children}
+
+      <span className="sr-only">
+        {label || tooltip}
+      </span>
+    </Button>
+  );
 };
+
 
 const MessageBranchContext = createContext(null);
 
